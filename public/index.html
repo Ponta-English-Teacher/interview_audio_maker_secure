@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interview Show Demonstrate</title>
+  <link rel="stylesheet" href="InterviewAudio.css" />
+</head>
+<body>
+  <header>
+    <h1>🎤 Interview Show Demonstrate</h1>
+    <p class="subtitle">Powered by Google Cloud TTS</p>
+  </header>
+
+  <main>
+    <section id="scriptSection">
+      <label for="scriptInput">🎬 Enter Your Interview Script:</label>
+      <textarea id="scriptInput" rows="10" placeholder="e.g., Host: Welcome!\nGuest: Thank you for having me."></textarea>
+    </section>
+
+    <section id="voiceSelection">
+      <h2>🎙️ Assign Voices</h2>
+      <div>
+        <label>Host Voice:</label>
+        <select id="hostVoice">
+          <option value="en-US-Wavenet-D">Male A (Wavenet-D)</option>
+          <option value="en-US-Wavenet-B">Male B (Wavenet-B)</option>
+          <option value="en-US-Wavenet-F">Female A (Wavenet-F)</option>
+          <option value="en-US-Wavenet-E">Female B (Wavenet-E)</option>
+        </select>
+      </div>
+      <div>
+        <label>Guest Voice:</label>
+        <select id="guestVoice">
+          <option value="en-US-Wavenet-F">Female A (Wavenet-F)</option>
+          <option value="en-US-Wavenet-E">Female B (Wavenet-E)</option>
+          <option value="en-US-Wavenet-D">Male A (Wavenet-D)</option>
+          <option value="en-US-Wavenet-B">Male B (Wavenet-B)</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="controls">
+      <button onclick="generateAudio()">🎧 Generate & Play</button>
+      <button onclick="downloadAudio()">💾 Download MP3</button>
+    </section>
+
+    <section id="statusArea">
+      <p id="statusMessage" style="color: yellow; font-weight: bold;"></p>
+    </section>
+
+    <section id="playerSection">
+      <audio id="audioPlayer" controls></audio>
+    </section>
+  </main>
+
+  <script src="InterviewAudio.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+body {
+  background: radial-gradient(circle, #111, #000);
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #ffcc00;
+  text-shadow: 0 0 5px #ffcc00, 0 0 15px #ff9900;
+}
+
+.subtitle {
+  color: #aaa;
+  font-style: italic;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+select {
+  background: #222;
+  color: #fff;
+  padding: 6px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+button {
+  background: #ffcc00;
+  border: none;
+  color: #000;
+  padding: 10px 20px;
+  margin-right: 10px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ffcc00;
+}
+
+button:hover {
+  background: #ffaa00;
+}
+
+audio {
+  width: 100%;
+  margin-top: 20px;
+}
