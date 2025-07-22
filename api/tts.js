@@ -15,27 +15,19 @@ export default async function handler(req, res) {
   }
 
   const { ssml } = req.body;
-const apiKey = process.env.GOOGLE_API_KEY;
+  const apiKey = process.env.GOOGLE_API_KEY;
 
-if (!apiKey || !ssml) {
-  return res.status(400).json({ error: 'Missing required fields' });
-}
-  console.log("Incoming TTS request:", { ssml, voice });
-
-  if (!apiKey || !ssml || !voice) {
+  if (!apiKey || !ssml) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const isStudio = voice.startsWith('en-US-Studio');
-  const url = isStudio
-    ? 'https://texttospeech.googleapis.com/v1beta1/text:synthesize'
-    : 'https://texttospeech.googleapis.com/v1/text:synthesize';
+  const url = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 
   const requestBody = {
     input: { ssml },
     voice: {
       languageCode: 'en-US',
-      name: voice,
+      name: 'en-US-Wavenet-D', // default voice; overridden by SSML
     },
     audioConfig: {
       audioEncoding: 'MP3',
@@ -51,11 +43,24 @@ if (!apiKey || !ssml) {
       body: JSON.stringify(requestBody),
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      const text = await response.text();
+      console.error("Google TTS API response not JSON:", text);
+      return res.status(500).json({
+        error: "Invalid response from Google TTS",
+        detail: text,
+      });
+    }
 
     if (!response.ok) {
       console.error("Google TTS API Error Response:", data);
-      return res.status(500).json({ error: data.error?.message || 'TTS API failed' });
+      return res.status(500).json({
+        error: data?.error?.message || 'Google TTS API failed',
+        detail: typeof data === 'string' ? data : JSON.stringify(data),
+      });
     }
 
     res.status(200).json(data);
