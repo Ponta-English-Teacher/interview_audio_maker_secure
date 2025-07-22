@@ -1,47 +1,66 @@
-import express from 'express';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+// api/tts.js
 
-dotenv.config();
-const router = express.Router();
+import { config } from 'dotenv';
+config();
 
-router.post('/', async (req, res) => {
-  const { ssml } = req.body;
-  const apiKey = process.env.GOOGLE_API_KEY;
+export const configSettings = {
+  api: {
+    bodyParser: true,
+  },
+};
 
-  if (!apiKey || !ssml) {
-    return res.status(400).json({ error: 'Missing API key or SSML input' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const { ssml } = req.body;
+const apiKey = process.env.GOOGLE_API_KEY;
+
+if (!apiKey || !ssml) {
+  return res.status(400).json({ error: 'Missing required fields' });
+}
+  console.log("Incoming TTS request:", { ssml, voice });
+
+  if (!apiKey || !ssml || !voice) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const isStudio = voice.startsWith('en-US-Studio');
+  const url = isStudio
+    ? 'https://texttospeech.googleapis.com/v1beta1/text:synthesize'
+    : 'https://texttospeech.googleapis.com/v1/text:synthesize';
+
+  const requestBody = {
+    input: { ssml },
+    voice: {
+      languageCode: 'en-US',
+      name: voice,
+    },
+    audioConfig: {
+      audioEncoding: 'MP3',
+    },
+  };
 
   try {
-    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
+    const response = await fetch(`${url}?key=${apiKey}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { ssml },
-        voice: {
-          languageCode: 'en-US',
-          name: 'en-US-Wavenet-D'
-        },
-        audioConfig: {
-          audioEncoding: 'MP3'
-        }
-      })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     });
 
-    // If the API didn't succeed, return the error
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('TTS API Error:', errorText);
-      return res.status(response.status).json({ error: 'TTS API Error', details: errorText });
+      console.error("Google TTS API Error Response:", data);
+      return res.status(500).json({ error: data.error?.message || 'TTS API failed' });
     }
 
-    const data = await response.json();
     res.status(200).json(data);
-  } catch (err) {
-    console.error('Server Error:', err);
-    res.status(500).json({ error: 'TTS synthesis failed', details: err.message });
+  } catch (error) {
+    console.error('TTS Server Error:', error);
+    res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
+}
