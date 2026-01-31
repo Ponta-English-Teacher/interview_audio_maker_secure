@@ -52,7 +52,7 @@ function buildSSML(script, hostVoice, guestVoice) {
   const lines = script.split("\n");
   let ssml = "<speak>\n";
 
-  const speakerRegex = /^\*\*(.+?)\:\*\*\s*/;
+  const speakerRegex = /^\*\*(.+?)\*\*\s*:\s*/;
 
   lines.forEach(line => {
     const trimmed = line.trim();
