@@ -25,7 +25,12 @@ async function generateAudio() {
       body: JSON.stringify({ ssml })
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+  const errorText = await response.text();
+  throw new Error(`Server error: ${errorText}`);
+}
+
+const data = await response.json();
 
     if (data.audioContent) {
       const audioBlob = new Blob(
@@ -52,7 +57,8 @@ function buildSSML(script, hostVoice, guestVoice) {
   const lines = script.split("\n");
   let ssml = "<speak>\n";
 
-  const speakerRegex = /^\*\*(.+?)\:\*\*\s*/;
+  const speakerRegex = /^\*\*(.+?)\*\*\s*:\s*/;
+
 
   lines.forEach(line => {
     const trimmed = line.trim();
