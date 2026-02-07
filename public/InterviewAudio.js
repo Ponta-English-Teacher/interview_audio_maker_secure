@@ -57,26 +57,49 @@ function buildSSML(script, hostVoice, guestVoice) {
   const lines = script.split("\n");
   let ssml = "<speak>\n";
 
-  const speakerRegex = /^\*\*(.+?)\*\*\s*:\s*/;
+  // Accept both:
+  // **Name:** text
+  // **Name:**  (speaker only) then text on next line(s)
+  const speakerLineRegex = /^\*\*(.+?):\*\*\s*(.*)$/;
 
+  let currentSpeaker = null;
 
-  lines.forEach(line => {
+  for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed) return;
+    if (!trimmed) continue;
 
-    const match = trimmed.match(speakerRegex);
+    // Ignore separators and headings
+    if (trimmed === "---") continue;
 
-    if (match) {
-      const speaker = match[1].trim();
-      const rawText = trimmed.replace(speakerRegex, "").trim();
-      const text = removeBrackets(rawText);
-      const voice = speaker.toLowerCase() === "host" ? hostVoice : guestVoice;
+    // Ignore stage directions like [Opening Scene ...] or (Closing ...)
+    const deStarred = trimmed.replace(/^\*\*|\*\*$/g, "").trim();
+    if (/^\[.*\]$/.test(deStarred) || /^\(.*\)$/.test(deStarred)) continue;
 
-      ssml += `<voice name="${voice}">${escapeXML(text)}</voice><break time="500ms"/>\n`;
-    } else {
-      console.warn("Skipping non-dialogue line:", trimmed);
+    // Speaker line?
+    const m = trimmed.match(speakerLineRegex);
+    if (m) {
+      currentSpeaker = m[1].trim();
+      const inlineText = removeBrackets((m[2] || "").trim());
+
+      // Speak inline text if present (one-line format)
+      if (inlineText) {
+        const voice =
+          currentSpeaker.toLowerCase() === "host" ? hostVoice : guestVoice;
+        ssml += `<voice name="${voice}">${escapeXML(inlineText)}</voice><break time="500ms"/>\n`;
+      }
+      continue;
     }
-  });
+
+    // Continuation text for the current speaker (two-line format)
+    if (!currentSpeaker) continue;
+
+    const text = removeBrackets(trimmed);
+    if (!text) continue;
+
+    const voice =
+      currentSpeaker.toLowerCase() === "host" ? hostVoice : guestVoice;
+    ssml += `<voice name="${voice}">${escapeXML(text)}</voice><break time="500ms"/>\n`;
+  }
 
   ssml += "</speak>";
   return ssml;
